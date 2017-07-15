@@ -1,0 +1,18 @@
+//Copyright, Daniel parr, 01/07/2017
+//Use or manipulation of this code is not allowed.
+//To reuse any code, email me at daniel.parr@outlook.com
+//The main question is, how did you get here?
+
+{
+  "name" : "mmosvr",
+  "version" : "0.0.1",
+  "private" : true,
+  "dependencies" : {
+    "minimist" : "*",
+    "extend" : "*",
+    "binary-parser" : "*",
+    "performance-now": "*",
+    "mongoose" : "*",
+    "underscore": "*"
+  }
+}

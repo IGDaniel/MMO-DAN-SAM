@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>server.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(0,0,128); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+server.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//Copyright, Daniel parr, 01/07/2017</span><span class="s1"> 
+</span><span class="s0">//Use or manipulation of this code is not allowed.</span><span class="s1"> 
+</span><span class="s0">//To reuse any code, email me at daniel.parr@outlook.com</span><span class="s1"> 
+</span><span class="s0">//The main question is, how did you get here?</span><span class="s1"> 
+ 
+</span><span class="s0">//Import Required Libraries</span><span class="s1"> 
+ 
+require(__dirname + </span><span class="s2">'/Resources/config.js'</span><span class="s1">); 
+</span><span class="s3">var </span><span class="s1">fs = require(</span><span class="s2">'fs'</span><span class="s1">); 
+</span><span class="s3">var </span><span class="s1">net = require(</span><span class="s2">'net'</span><span class="s1">); 
+require(</span><span class="s2">'./packet.js'</span><span class="s1">) 
+ 
+</span><span class="s0">//Load the initializers</span><span class="s1"> 
+</span><span class="s3">var </span><span class="s1">init_files = fs.readdirSync(__dirname + </span><span class="s2">&quot;/Initializers&quot;</span><span class="s1">); 
+init_files.forEach(</span><span class="s3">function</span><span class="s1">(initFile){ 
+    console.log(</span><span class="s2">'Loading Initializer: ' </span><span class="s1">+ initFile); 
+    require(__dirname + </span><span class="s2">&quot;/Initializers/&quot; </span><span class="s1">+ initFile); 
+}); 
+ 
+</span><span class="s0">//Load the models</span><span class="s1"> 
+</span><span class="s3">var </span><span class="s1">model_files = fs.readdirSync(__dirname + </span><span class="s2">&quot;/Models&quot;</span><span class="s1">); 
+model_files.forEach(</span><span class="s3">function</span><span class="s1">(modelFile){ 
+    console.log(</span><span class="s2">'Loading Model: ' </span><span class="s1">+ modelFile); 
+    require(__dirname + </span><span class="s2">&quot;/Models/&quot; </span><span class="s1">+ modelFile); 
+}); 
+ 
+</span><span class="s0">//Load model_files maps</span><span class="s1"> 
+maps = {}; 
+</span><span class="s3">var </span><span class="s1">map_files = fs.readdirSync(config.data_paths.maps); 
+map_files.forEach(</span><span class="s3">function</span><span class="s1">(mapFile){ 
+    console.log(</span><span class="s2">'Loading Map: ' </span><span class="s1">+ mapFile); 
+    </span><span class="s3">var </span><span class="s1">map = require(config.data_paths.maps + mapFile); 
+    maps[map.room] = map 
+}); 
+ 
+net.createServer(</span><span class="s3">function</span><span class="s1">(socket){ 
+    console.log(</span><span class="s2">&quot;socket connected&quot;</span><span class="s1">); 
+    </span><span class="s3">var </span><span class="s1">c_inst = </span><span class="s3">new </span><span class="s1">require(</span><span class="s2">'./client.js'</span><span class="s1">); 
+    </span><span class="s3">var </span><span class="s1">thisClient = </span><span class="s3">new </span><span class="s1">c_inst(); 
+    thisClient.socket = socket; 
+    thisClient.initiate(); 
+ 
+    socket.on(</span><span class="s2">'error'</span><span class="s1">, thisClient.error); 
+ 
+    socket.on(</span><span class="s2">'end'</span><span class="s1">, thisClient.end); 
+ 
+    socket.on(</span><span class="s2">'data'</span><span class="s1">, thisClient.data); 
+ 
+}).listen(config.port); 
+ 
+console.log(</span><span class="s2">&quot;Initialize Completed, Server runnng on port: &quot; </span><span class="s1">+ config.port + </span><span class="s2">&quot; for environment: &quot; </span><span class="s1">+ config.environment); 
+ 
+</span></pre>
+</body>
+</html>

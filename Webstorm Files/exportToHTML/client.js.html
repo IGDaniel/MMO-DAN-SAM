@@ -1,0 +1,73 @@
+<html>
+<head>
+<title>client.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+client.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//Copyright, Daniel parr, 01/07/2017</span><span class="s1"> 
+</span><span class="s0">//Use or manipulation of this code is not allowed.</span><span class="s1"> 
+</span><span class="s0">//To reuse any code, email me at daniel.parr@outlook.com</span><span class="s1"> 
+</span><span class="s0">//The main question is, how did you get here?</span><span class="s1"> 
+ 
+</span><span class="s2">var </span><span class="s1">now = require(</span><span class="s3">'performance-now'</span><span class="s1">); 
+</span><span class="s2">var </span><span class="s1">_ = require(</span><span class="s3">'underscore'</span><span class="s1">); 
+ 
+module.exports = </span><span class="s2">function</span><span class="s1">(){ 
+ 
+    </span><span class="s2">var </span><span class="s1">client = </span><span class="s2">this</span><span class="s1">; 
+ 
+    </span><span class="s0">//Initialization</span><span class="s1"> 
+    </span><span class="s2">this</span><span class="s1">.initiate = </span><span class="s2">function</span><span class="s1">(){ 
+        </span><span class="s0">//Send the connection handshake packet to the client.</span><span class="s1"> 
+        client.socket.write(packet.build([</span><span class="s3">&quot;HELLO&quot;</span><span class="s1">, now().toString()])); 
+        console.log(</span><span class="s3">'client initiated'</span><span class="s1">) 
+    }; 
+ 
+    </span><span class="s0">//Client Methods</span><span class="s1"> 
+    </span><span class="s2">this</span><span class="s1">.enterroom = </span><span class="s2">function</span><span class="s1">(selected_room){ 
+        maps[selected_room].clients.forEach(</span><span class="s2">function</span><span class="s1">(otherClient){ 
+            otherClient.socket.write(packet.build([</span><span class="s3">&quot;ENTER&quot;</span><span class="s1">, client.user.username, client.user.pos_x, client.user.pos_y])) 
+        }) 
+        maps[selected_room].clients.push(client); 
+    }; 
+ 
+    </span><span class="s2">this</span><span class="s1">.broadcastroom = </span><span class="s2">function</span><span class="s1">(packetData){ 
+ 
+        maps[client.user.current_room].clients.forEach(</span><span class="s2">function</span><span class="s1">(otherClient){ 
+ 
+            </span><span class="s2">if</span><span class="s1">(otherClient.user.username != client.user.username){ 
+                otherClient.socket.write(packetData); 
+            }; 
+ 
+        }) 
+ 
+    }; 
+ 
+    </span><span class="s0">//Socket Stuff</span><span class="s1"> 
+    </span><span class="s2">this</span><span class="s1">.data = </span><span class="s2">function</span><span class="s1">(data){ 
+        packet.parse(client, data); 
+    }; 
+ 
+    </span><span class="s2">this</span><span class="s1">.error = </span><span class="s2">function</span><span class="s1">(err){ 
+        console.log(</span><span class="s3">&quot;client error &quot; </span><span class="s1">+ err.toString()); 
+    }; 
+ 
+    </span><span class="s2">this</span><span class="s1">.end = </span><span class="s2">function</span><span class="s1">(){ 
+        console.log(</span><span class="s3">&quot;client closed&quot;</span><span class="s1">); 
+    }; 
+}</span></pre>
+</body>
+</html>

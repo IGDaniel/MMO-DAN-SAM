@@ -1,0 +1,120 @@
+<html>
+<head>
+<title>packet.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+packet.js</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//Copyright, Daniel parr, 01/07/2017</span><span class="s1"> 
+</span><span class="s0">//Use or manipulation of this code is not allowed.</span><span class="s1"> 
+</span><span class="s0">//To reuse any code, email me at daniel.parr@outlook.com</span><span class="s1"> 
+</span><span class="s0">//The main question is, how did you get here?</span><span class="s1"> 
+ 
+</span><span class="s2">var </span><span class="s1">zeroBuffer = </span><span class="s2">new </span><span class="s1">Buffer(</span><span class="s3">'00'</span><span class="s1">, </span><span class="s3">'hex'</span><span class="s1">); 
+module.exports = packet = { 
+    </span><span class="s0">//params: an array of javascript objects to be turned into buffers.</span><span class="s1"> 
+    build: </span><span class="s2">function</span><span class="s1">(params){ 
+        </span><span class="s2">var </span><span class="s1">packetParts = []; 
+        </span><span class="s2">var </span><span class="s1">packetSize = </span><span class="s4">0</span><span class="s1">; 
+        params.forEach(</span><span class="s2">function</span><span class="s1">(param){ 
+            </span><span class="s2">var </span><span class="s1">buffer; 
+            </span><span class="s2">if</span><span class="s1">(</span><span class="s2">typeof </span><span class="s1">param === </span><span class="s3">'string'</span><span class="s1">){ 
+                buffer = </span><span class="s2">new </span><span class="s1">Buffer(param, </span><span class="s3">'utf8'</span><span class="s1">); 
+                buffer = Buffer.concat([buffer, zeroBuffer], buffer.length + </span><span class="s4">1</span><span class="s1">) 
+            } 
+            </span><span class="s2">else if </span><span class="s1">(</span><span class="s2">typeof </span><span class="s1">param === </span><span class="s3">'number'</span><span class="s1">){ 
+                buffer = </span><span class="s2">new </span><span class="s1">Buffer(</span><span class="s4">2</span><span class="s1">); 
+                buffer.writeUInt16LE(param, </span><span class="s4">0</span><span class="s1">); 
+            } 
+            </span><span class="s2">else </span><span class="s1">{ 
+                console.log(</span><span class="s3">&quot;WARNING: Unknown data type in packet builder!&quot;</span><span class="s1">); 
+            } 
+ 
+            packetSize += buffer.length; 
+            packetParts.push(buffer); 
+ 
+        }) 
+ 
+        </span><span class="s2">var </span><span class="s1">dataBuffer = Buffer.concat(packetParts, packetSize); 
+        </span><span class="s2">var </span><span class="s1">size = </span><span class="s2">new </span><span class="s1">Buffer(</span><span class="s4">1</span><span class="s1">); 
+        size.writeUInt8(dataBuffer.length + </span><span class="s4">1</span><span class="s1">, </span><span class="s4">0</span><span class="s1">); 
+ 
+        </span><span class="s2">var </span><span class="s1">finalPacket = Buffer.concat([size, dataBuffer], size.length + dataBuffer.length); 
+ 
+        </span><span class="s2">return </span><span class="s1">finalPacket; 
+ 
+    }, 
+ 
+    </span><span class="s0">//Parse a packet to be handled for a client</span><span class="s1"> 
+    parse: </span><span class="s2">function</span><span class="s1">(c, data){ 
+ 
+        </span><span class="s2">var </span><span class="s1">idx = </span><span class="s4">0</span><span class="s1">; 
+ 
+        </span><span class="s2">while</span><span class="s1">( idx &lt; data.length ){ 
+ 
+            </span><span class="s2">var </span><span class="s1">packetSize = data.readUInt8(idx); 
+            </span><span class="s2">var </span><span class="s1">extractedPacket = </span><span class="s2">new </span><span class="s1">Buffer(packetSize); 
+            data.copy(extractedPacket, </span><span class="s4">0</span><span class="s1">, idx, idx + packetSize) 
+ 
+            </span><span class="s2">this</span><span class="s1">.interpret(c, extractedPacket); 
+ 
+            idx += packetSize; 
+        } 
+    }, 
+ 
+    interpret: </span><span class="s2">function</span><span class="s1">(c, datapacket){ 
+        </span><span class="s2">var </span><span class="s1">header = PacketModels.header.parse(datapacket); 
+        console.log(</span><span class="s3">&quot;Interpret: &quot; </span><span class="s1">+ header.command); 
+ 
+        </span><span class="s2">switch </span><span class="s1">(header.command.toUpperCase()){ 
+ 
+            </span><span class="s2">case </span><span class="s3">&quot;LOGIN&quot;</span><span class="s1">: 
+                </span><span class="s2">var </span><span class="s1">data = PacketModels.login.parse(datapacket); 
+                User.login(data.username, data.password, </span><span class="s2">function</span><span class="s1">(result, user){ 
+                    console.log(</span><span class="s3">'Login Result ' </span><span class="s1">+ result) 
+                    </span><span class="s2">if</span><span class="s1">(result){ 
+                        c.user = user; 
+                        c.enterroom(c.user.current_room); 
+                        c.socket.write(packet.build([</span><span class="s3">&quot;LOGIN&quot;</span><span class="s1">, </span><span class="s3">&quot;TRUE&quot;</span><span class="s1">, c.user.current_room, c.user.pos_x, c.user.pos_y, c.user.username])) 
+                    }</span><span class="s2">else</span><span class="s1">{ 
+                        c.socket.write(packet.build([</span><span class="s3">&quot;LOGIN&quot;</span><span class="s1">, </span><span class="s3">&quot;FALSE&quot;</span><span class="s1">])) 
+                    } 
+                }) 
+                </span><span class="s2">break</span><span class="s1">; 
+ 
+            </span><span class="s2">case </span><span class="s3">&quot;REGISTER&quot;</span><span class="s1">: 
+                </span><span class="s2">var </span><span class="s1">data = PacketModels.register.parse(datapacket); 
+                User.register(data.username, data.password, </span><span class="s2">function</span><span class="s1">(result){ 
+                    </span><span class="s2">if</span><span class="s1">(result){ 
+                        c.socket.write(packet.build([</span><span class="s3">&quot;REGISTER&quot;</span><span class="s1">, </span><span class="s3">&quot;TRUE&quot;</span><span class="s1">])) 
+                    }</span><span class="s2">else</span><span class="s1">{ 
+                        c.socket.write(packet.build([</span><span class="s3">&quot;REGISTER&quot;</span><span class="s1">, </span><span class="s3">&quot;FALSE&quot;</span><span class="s1">])) 
+                    } 
+                }) 
+                </span><span class="s2">break</span><span class="s1">; 
+ 
+            </span><span class="s2">case </span><span class="s3">&quot;POS&quot;</span><span class="s1">: 
+                </span><span class="s2">var </span><span class="s1">data = PacketModels.pos.parse(datapacket); 
+                c.user.pos_x = data.target_x; 
+                c.user.pos_y = data.target_y; 
+                c.user.save(); 
+                c.broadcastroom(packet.build([</span><span class="s3">&quot;POS&quot;</span><span class="s1">, c.user.username, data.target_x, data.target_y])); 
+                console.log(data); 
+        } 
+    } 
+}</span></pre>
+</body>
+</html>

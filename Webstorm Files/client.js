@@ -48,6 +48,5 @@ module.exports = function(){
 
     this.end = function(){
         console.log("client closed");
-        c.user.save();
     };
 }
